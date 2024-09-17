@@ -1,26 +1,38 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+/* eslint-disable prettier/prettier */
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { LoginUserDto, SignUpDto } from '../dto';
+import { JwtService } from '@nestjs/jwt';
+import { HashService } from 'src/libs/utils/services/hash.service';
+import { UserService } from 'src/module/user/services/user.service';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+    private readonly hashService: HashService,
+  ) {}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async logInUsers(loginUser: LoginUserDto) {
+    const user = await this.userService.findOneByEmail(loginUser.email);
+    if (!user) {
+      throw new BadRequestException('User not found. Try again.');
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    const isPasswordValid = await this.hashService.compare(
+      loginUser.password,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Incorrect password. Try again.');
+    }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+    const userPayload: UserJwtPayload = {
+      sub: user.id,
+      username: user.username,
+      email: user.email,
+    };
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return await this.getTokens(userPayload);
   }
 }
