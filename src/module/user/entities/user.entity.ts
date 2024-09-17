@@ -1,13 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString } from 'class-validator';
+import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User extends Document {
   @ApiProperty()
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   @IsString()
-  name: string;
+  username: string;
 
   @ApiProperty()
   @Prop({ required: true, unique: true })
