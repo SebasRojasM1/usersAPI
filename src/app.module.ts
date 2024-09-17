@@ -4,7 +4,7 @@ import dbConfig from './libs/config/persistence/db-config';
 import { ConfigModule } from '@nestjs/config';
 import { persistenceModule } from './libs/config/persistence/persistence.module';
 import { UserModule } from './module/user/user.module';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './libs/auth/auth.module';
 
 @Module({
   imports: [
