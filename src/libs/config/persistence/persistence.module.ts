@@ -1,17 +1,23 @@
-import { registerAs } from '@nestjs/config';
+import { Global, Module } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import dbConfig from './db-config';
 
-export default registerAs('dbConfig', () => {
-  const dbConfig = {
-    db: {
-      connection: process.env.DB_CONNECTION,
-      host: process.env.DB_HOST,
-      mongoHost: process.env.MONGO_HOST,
-      name: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      cluster: process.env.DB_CLUSTER,
-      password: process.env.DB_PASSWORD,
-    },
-    env: process.env.NODE_ENV || 'local',
-  };
-  return dbConfig;
-});
+@Global()
+@Module({
+  imports: [
+    MongooseModule.forRootAsync({
+      useFactory: (configService: ConfigType<typeof dbConfig>) => {
+        const { db } = configService;
+
+        const uriDb = `${db.connection}${db.user}:${db.password}@${db.cluster}/${db.name}?retryWrites=true&w=majority`;
+
+        return {
+          uri: uriDb,
+        };
+      },
+      inject: [dbConfig.KEY],
+    }),
+  ],
+})
+export class persistenceModule {}
