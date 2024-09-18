@@ -77,7 +77,7 @@ export class UserService {
   }
 
   async deleteUser(id: string) {
-    const deletedUser = await this.userModel.findOneAndDelete().exec();
+    const deletedUser = await this.userModel.findOneAndDelete({ _id: id }).exec();
     if (!deletedUser) {
       throw new NotFoundException(
         `The user with id ${id} it´s not found. Try again.`,
